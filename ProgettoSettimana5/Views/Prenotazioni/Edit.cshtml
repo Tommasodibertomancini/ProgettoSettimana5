@@ -110,7 +110,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Funzione per aggiornare il riepilogo
+        
         function aggiornaCostoTotale() {
             var dataInizio = new Date($('#DataInizio').val());
             var dataFine = new Date($('#DataFine').val());
@@ -129,8 +129,7 @@
             }
         }
 
-        // Funzione per verificare la disponibilità della camera
-        function verificaDisponibilita() {
+            function verificaDisponibilita() {
             var cameraId = $('#CameraId').val();
             var dataInizio = $('#DataInizio').val();
             var dataFine = $('#DataFine').val();
@@ -172,7 +171,6 @@
             }
         }
 
-        // Event listeners per aggiornare dinamicamente il riepilogo e verificare disponibilità
         $(document).ready(function() {
             // Aggiorna costo totale quando cambiano date o camera
             $('#DataInizio, #DataFine, #CameraId').on('change', function() {
@@ -182,7 +180,7 @@
                     var tipoCamera = selectedOption.text().split('-')[0].trim();
                     $('#TipoCamera').text(tipoCamera);
 
-                    // Aggiorna il prezzo della camera
+                    // Aggiorna il prezzo
                     var prezzo = selectedOption.data('prezzo') || 0;
                     $('#PrezzoCamera').val(prezzo);
                 }

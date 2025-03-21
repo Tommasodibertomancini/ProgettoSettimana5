@@ -75,8 +75,9 @@ namespace ProgettoSettimana5.ViewModels
 
         [Display(Name = "Stato")]
         public StatoPrenotazione Stato { get; set; }
-
+        [ValidateNever]
         public SelectList Clienti { get; set; }
+        [ValidateNever]
         public SelectList Camere { get; set; }
 
         public decimal PrezzoCamera { get; set; }

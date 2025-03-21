@@ -4,6 +4,7 @@ using ProgettoSettimana5.Data;
 using ProgettoSettimana5.Models;
 using ProgettoSettimana5.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
