@@ -1,0 +1,176 @@
+﻿@model ProgettoSettimana5.ViewModels.CameraDetailViewModel
+
+@{
+    ViewData["Title"] = "Dettagli Camera";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Camera #@Model.Camera.Numero</h1>
+    <div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Camera.CameraId" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Modifica
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Torna alla lista
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informazioni camera</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Numero:</label>
+                    <p>@Model.Camera.Numero</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tipo:</label>
+                    <p>@Model.Camera.Tipo</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prezzo per notte:</label>
+                    <p>€ @Model.Camera.Prezzo.ToString("N2")</p>
+                </div>
+            </div>
+        </div>
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+        {
+            <div class="d-grid">
+                <a asp-controller="Prenotazioni" asp-action="Create" asp-route-cameraId="@Model.Camera.CameraId" class="btn btn-success mb-4">
+                    <i class="bi bi-calendar-plus"></i> Nuova Prenotazione
+                </a>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-8">
+        <ul class="nav nav-tabs mb-3" id="prenotazioniTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="attive-tab" data-bs-toggle="tab" data-bs-target="#attive" type="button" role="tab" aria-controls="attive" aria-selected="true">
+                    Prenotazioni Attive
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="future-tab" data-bs-toggle="tab" data-bs-target="#future" type="button" role="tab" aria-controls="future" aria-selected="false">
+                    Prenotazioni Future
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="prenotazioniTabContent">
+            <div class="tab-pane fade show active" id="attive" role="tabpanel" aria-labelledby="attive-tab">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Prenotazioni Attive</h5>
+                        <span class="badge bg-light text-dark">@Model.PrenotazioniAttive.Count</span>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.PrenotazioniAttive.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Check-in</th>
+                                            <th>Check-out</th>
+                                            <th>Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var prenotazione in Model.PrenotazioniAttive)
+                                        {
+                                            <tr>
+                                                <td>@prenotazione.Cliente.NomeCompleto</td>
+                                                <td>@prenotazione.DataInizio.ToShortDateString()</td>
+                                                <td>@prenotazione.DataFine.ToShortDateString()</td>
+                                                <td>
+                                                    <a asp-controller="Prenotazioni" asp-action="Details" asp-route-id="@prenotazione.PrenotazioneId" class="btn btn-sm btn-info">
+                                                        <i class="bi bi-info-circle"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Nessuna prenotazione attiva per questa camera.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="future" role="tabpanel" aria-labelledby="future-tab">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Prenotazioni Future</h5>
+                        <span class="badge bg-light text-dark">@Model.PrenotazioniFuture.Count</span>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.PrenotazioniFuture.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Cliente</th>
+                                            <th>Check-in</th>
+                                            <th>Check-out</th>
+                                            <th>Stato</th>
+                                            <th>Azioni</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var prenotazione in Model.PrenotazioniFuture)
+                                        {
+                                            <tr>
+                                                <td>@prenotazione.Cliente.NomeCompleto</td>
+                                                <td>@prenotazione.DataInizio.ToShortDateString()</td>
+                                                <td>@prenotazione.DataFine.ToShortDateString()</td>
+                                                <td>
+                                                    @switch (prenotazione.Stato)
+                                                    {
+                                                        case StatoPrenotazione.Confermata:
+                                                            <span class="badge bg-success">Confermata</span>
+                                                            break;
+                                                        case StatoPrenotazione.InAttesa:
+                                                            <span class="badge bg-warning text-dark">In Attesa</span>
+                                                            break;
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <a asp-controller="Prenotazioni" asp-action="Details" asp-route-id="@prenotazione.PrenotazioneId" class="btn btn-sm btn-info">
+                                                        <i class="bi bi-info-circle"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> Nessuna prenotazione futura per questa camera.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

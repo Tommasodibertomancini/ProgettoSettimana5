@@ -1,0 +1,198 @@
+﻿@model ProgettoSettimana5.ViewModels.PrenotazioneEditViewModel
+
+@{
+    ViewData["Title"] = "Modifica Prenotazione";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Modifica Prenotazione #@Model.PrenotazioneId</h1>
+        <div>
+            <a asp-action="Details" asp-route-id="@Model.PrenotazioneId" class="btn btn-info me-2">
+                <i class="bi bi-info-circle"></i> Dettagli
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Torna alla lista
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Dati della prenotazione</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" id="prenotazioneForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="PrenotazioneId" id="PrenotazioneId" />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ClienteId" class="form-label">Cliente</label>
+                                <select asp-for="ClienteId" class="form-select" asp-items="Model.Clienti">
+                                    <option value="">-- Seleziona un cliente --</option>
+                                </select>
+                                <span asp-validation-for="ClienteId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CameraId" class="form-label">Camera</label>
+                                <select asp-for="CameraId" class="form-select" asp-items="Model.Camere" id="CameraId">
+                                    <option value="">-- Seleziona una camera --</option>
+                                </select>
+                                <span asp-validation-for="CameraId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DataInizio" class="form-label">Data Check-in</label>
+                                <input asp-for="DataInizio" class="form-control" type="date" id="DataInizio" />
+                                <span asp-validation-for="DataInizio" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DataFine" class="form-label">Data Check-out</label>
+                                <input asp-for="DataFine" class="form-control" type="date" id="DataFine" />
+                                <span asp-validation-for="DataFine" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Stato" class="form-label">Stato Prenotazione</label>
+                            <select asp-for="Stato" class="form-select" asp-items="Html.GetEnumSelectList<StatoPrenotazione>()">
+                            </select>
+                            <span asp-validation-for="Stato" class="text-danger"></span>
+                        </div>
+
+                        <div id="messaggioDisponibilita" class="mb-3"></div>
+
+                        <input type="hidden" id="PrezzoCamera" asp-for="PrezzoCamera" />
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="btnSalva">
+                                <i class="bi bi-save"></i> Salva Modifiche
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Riepilogo</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tipo Camera:</label>
+                        <p id="TipoCamera">@Model.Camere.FirstOrDefault(c => c.Value == Model.CameraId.ToString())?.Text.Split('-')[0].Trim()</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Prezzo per notte:</label>
+                        <p id="PrezzoCameraTesto">€ @Model.PrezzoCamera.ToString("N2")</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Durata soggiorno:</label>
+                        <p id="DurataSoggiorno">@Model.GiorniSoggiorno giorni</p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Costo totale:</label>
+                        <p class="fs-4 fw-bold text-primary" id="CostoTotale">€ @Model.CostoTotale.ToString("N2")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Funzione per aggiornare il riepilogo
+        function aggiornaCostoTotale() {
+            var dataInizio = new Date($('#DataInizio').val());
+            var dataFine = new Date($('#DataFine').val());
+            var prezzo = parseFloat($('#PrezzoCamera').val()) || 0;
+
+            if (dataInizio && dataFine && dataFine > dataInizio) {
+                var giorniSoggiorno = Math.round((dataFine - dataInizio) / (1000 * 60 * 60 * 24));
+                var costoTotale = prezzo * giorniSoggiorno;
+
+                $('#DurataSoggiorno').text(giorniSoggiorno + ' giorni');
+                $('#PrezzoCameraTesto').text('€ ' + prezzo.toFixed(2));
+                $('#CostoTotale').text('€ ' + costoTotale.toFixed(2));
+            } else {
+                $('#DurataSoggiorno').text('-');
+                $('#CostoTotale').text('-');
+            }
+        }
+
+        // Funzione per verificare la disponibilità della camera
+        function verificaDisponibilita() {
+            var cameraId = $('#CameraId').val();
+            var dataInizio = $('#DataInizio').val();
+            var dataFine = $('#DataFine').val();
+            var prenotazioneId = $('#PrenotazioneId').val();
+
+            if (cameraId && dataInizio && dataFine) {
+                $.ajax({
+                    url: '@Url.Action("VerificaDisponibilitaCamera", "Prenotazioni")',
+                    type: 'POST',
+                    data: {
+                        cameraId: cameraId,
+                        dataInizio: dataInizio,
+                        dataFine: dataFine,
+                        prenotazioneId: prenotazioneId
+                    },
+                    success: function(response) {
+                        if (response.disponibile) {
+                            $('#messaggioDisponibilita')
+                                .removeClass('text-danger')
+                                .addClass('text-success')
+                                .text('Camera disponibile per le date selezionate');
+                            $('#btnSalva').prop('disabled', false);
+                        } else {
+                            $('#messaggioDisponibilita')
+                                .removeClass('text-success')
+                                .addClass('text-danger')
+                                .text('Camera non disponibile per le date selezionate');
+                            $('#btnSalva').prop('disabled', true);
+                        }
+                    },
+                    error: function() {
+                        $('#messaggioDisponibilita')
+                            .removeClass('text-success')
+                            .addClass('text-danger')
+                            .text('Errore nella verifica della disponibilità');
+                        $('#btnSalva').prop('disabled', true);
+                    }
+                });
+            }
+        }
+
+        // Event listeners per aggiornare dinamicamente il riepilogo e verificare disponibilità
+        $(document).ready(function() {
+            // Aggiorna costo totale quando cambiano date o camera
+            $('#DataInizio, #DataFine, #CameraId').on('change', function() {
+                // Aggiorna il tipo di camera nel riepilogo quando cambia la selezione
+                if ($(this).attr('id') === 'CameraId') {
+                    var selectedOption = $('#CameraId option:selected');
+                    var tipoCamera = selectedOption.text().split('-')[0].trim();
+                    $('#TipoCamera').text(tipoCamera);
+
+                    // Aggiorna il prezzo della camera
+                    var prezzo = selectedOption.data('prezzo') || 0;
+                    $('#PrezzoCamera').val(prezzo);
+                }
+
+                aggiornaCostoTotale();
+                verificaDisponibilita();
+            });
+
+            // Verifica disponibilità iniziale
+            verificaDisponibilita();
+        });
+    </script>
+}

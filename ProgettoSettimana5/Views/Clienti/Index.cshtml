@@ -1,0 +1,83 @@
+﻿@model ProgettoSettimana5.ViewModels.ClienteListViewModel
+
+@{
+    ViewData["Title"] = "Gestione Clienti";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Gestione Clienti</h1>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill"></i> Nuovo Cliente
+        </a>
+    }
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-white">
+        <form method="get" class="row g-3 align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" name="searchString" class="form-control" placeholder="Cerca per nome, cognome o email" value="@Model.SearchString">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Cerca
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-repeat"></i> Reset
+                </a>
+            </div>
+        </form>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Cognome</th>
+                        <th>Email</th>
+                        <th>Telefono</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cliente in Model.Clienti)
+                    {
+                        <tr>
+                            <td>@cliente.Nome</td>
+                            <td>@cliente.Cognome</td>
+                            <td>@cliente.Email</td>
+                            <td>@cliente.Telefono</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@cliente.ClienteId" class="btn btn-sm btn-info">
+                                        <i class="bi bi-info-circle"></i>
+                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@cliente.ClienteId" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    }
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@cliente.ClienteId" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <span class="text-muted">Totale clienti: @Model.Clienti.Count</span>
+    </div>
+</div>

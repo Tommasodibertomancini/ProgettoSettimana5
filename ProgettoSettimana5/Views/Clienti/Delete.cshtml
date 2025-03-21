@@ -1,0 +1,61 @@
+﻿@model ProgettoSettimana5.Models.Cliente
+
+@{
+    ViewData["Title"] = "Elimina Cliente";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Elimina Cliente</h1>
+    <div>
+        <a asp-action="Details" asp-route-id="@Model.ClienteId" class="btn btn-info">
+            <i class="bi bi-info-circle"></i> Dettagli
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Torna alla lista
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-danger mb-4">
+    <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Attenzione!</h4>
+    <p>Sei sicuro di voler eliminare questo cliente? Questa operazione non può essere annullata.</p>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Riepilogo dati del cliente</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome:</label>
+                    <p>@Model.Nome</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cognome:</label>
+                    <p>@Model.Cognome</p>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Email:</label>
+            <p>@Model.Email</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold">Telefono:</label>
+            <p>@Model.Telefono</p>
+        </div>
+
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="ClienteId" />
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Conferma Eliminazione
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

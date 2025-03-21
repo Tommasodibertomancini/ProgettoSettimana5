@@ -1,0 +1,153 @@
+﻿@model ProgettoSettimana5.ViewModels.PrenotazioneDetailViewModel
+
+@{
+    ViewData["Title"] = "Dettagli Prenotazione";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Dettagli Prenotazione #@Model.Prenotazione.PrenotazioneId</h1>
+    <div>
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Prenotazione.PrenotazioneId" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Modifica
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Torna alla lista
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Informazioni Cliente</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome e Cognome:</label>
+                    <p>@Model.Prenotazione.Cliente.NomeCompleto</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email:</label>
+                    <p><a href="mailto:@Model.Prenotazione.Cliente.Email">@Model.Prenotazione.Cliente.Email</a></p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Telefono:</label>
+                    <p><a href="tel:@Model.Prenotazione.Cliente.Telefono">@Model.Prenotazione.Cliente.Telefono</a></p>
+                </div>
+                <a asp-controller="Clienti" asp-action="Details" asp-route-id="@Model.Prenotazione.ClienteId"
+                   class="btn btn-outline-primary w-100">
+                    <i class="bi bi-person"></i> Vedi Profilo Cliente
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dettagli Soggiorno</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Check-in:</label>
+                        <p>@Model.Prenotazione.DataInizio.ToShortDateString()</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Check-out:</label>
+                        <p>@Model.Prenotazione.DataFine.ToShortDateString()</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Durata soggiorno:</label>
+                    <p>@Model.Prenotazione.GiorniSoggiorno giorni</p>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Camera:</label>
+                        <p>Camera #@Model.Prenotazione.Camera.Numero (@Model.Prenotazione.Camera.Tipo)</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Prezzo per notte:</label>
+                        <p>€ @Model.Prenotazione.Camera.Prezzo.ToString("N2")</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Stato prenotazione:</label>
+                    <p>
+                        @switch (Model.Prenotazione.Stato)
+                        {
+                            case StatoPrenotazione.Confermata:
+                                <span class="badge bg-success">Confermata</span>
+                                break;
+                            case StatoPrenotazione.InAttesa:
+                                <span class="badge bg-warning text-dark">In Attesa</span>
+                                break;
+                            case StatoPrenotazione.Cancellata:
+                                <span class="badge bg-danger">Cancellata</span>
+                                break;
+                            case StatoPrenotazione.Completata:
+                                <span class="badge bg-info">Completata</span>
+                                break;
+                        }
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Costo totale soggiorno:</label>
+                    <p class="fs-4 fw-bold text-primary">€ @Model.CostoTotale.ToString("N2")</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a asp-controller="Camere" asp-action="Details" asp-route-id="@Model.Prenotazione.CameraId"
+               class="btn btn-outline-info">
+                <i class="bi bi-building"></i> Dettagli Camera
+            </a>
+
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+            {
+                @if (Model.Prenotazione.Stato != StatoPrenotazione.Cancellata)
+                {
+                    <button onclick="cancellaPrenotazione(@Model.Prenotazione.PrenotazioneId)" class="btn btn-warning">
+                        <i class="bi bi-x-circle"></i> Cancella Prenotazione
+                    </button>
+                }
+
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <a asp-action="Delete" asp-route-id="@Model.Prenotazione.PrenotazioneId" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Elimina
+                    </a>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function cancellaPrenotazione(id) {
+            if (confirm('Sei sicuro di voler cancellare questa prenotazione?')) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Prenotazioni/Cancella/' + id,
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(result) {
+                       
+                        window.location.href = '/Prenotazioni/Index';
+                    },
+                    error: function() {
+                        alert('Si è verificato un errore durante la cancellazione della prenotazione.');
+                    }
+                });
+            }
+        }
+    </script>
+}

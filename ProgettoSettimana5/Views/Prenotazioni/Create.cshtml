@@ -1,0 +1,165 @@
+﻿@model ProgettoSettimana5.ViewModels.PrenotazioneCreateViewModel
+
+@{
+    ViewData["Title"] = "Nuova Prenotazione";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Nuova Prenotazione</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Torna alla lista
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Dati della prenotazione</h5>
+            </div>
+            <div class="card-body">               
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="ClienteId" class="form-label">Cliente</label>
+                            <select asp-for="ClienteId" class="form-select" asp-items="Model.Clienti">
+                                <option value="">-- Seleziona un cliente --</option>
+                            </select>
+                            <span asp-validation-for="ClienteId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CameraId" class="form-label">Camera</label>
+                            <select asp-for="CameraId" class="form-select" asp-items="Model.Camere" id="CameraId">
+                                <option value="">-- Seleziona una camera --</option>
+                            </select>
+                            <span asp-validation-for="CameraId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DataInizio" class="form-label">Data Check-in</label>
+                            <input asp-for="DataInizio" class="form-control" type="date" id="DataInizio" />
+                            <span asp-validation-for="DataInizio" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DataFine" class="form-label">Data Check-out</label>
+                            <input asp-for="DataFine" class="form-control" type="date" id="DataFine" />
+                            <span asp-validation-for="DataFine" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div id="messaggioDisponibilita"></div>
+
+                    <input type="hidden" id="PrezzoCamera" asp-for="PrezzoCamera" />
+
+                    <div class="d-grid gap-2">                        
+                        <button type="submit" class="btn btn-primary" id="btnSalva">
+                            <i class="bi bi-save"></i> Crea Prenotazione
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Riepilogo</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Tipo Camera:</label>
+                    <p id="TipoCamera">-</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prezzo per notte:</label>
+                    <p id="PrezzoCameraTesto">-</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Durata soggiorno:</label>
+                    <p id="DurataSoggiorno">-</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Costo totale:</label>
+                    <p class="fs-4 fw-bold text-primary" id="CostoTotale">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Funzione per aggiornare il riepilogo
+        function aggiornaCostoTotale() {
+            var dataInizio = new Date($('#DataInizio').val());
+            var dataFine = new Date($('#DataFine').val());
+            var prezzo = parseFloat($('#PrezzoCamera').val()) || 0;
+
+            if (dataInizio && dataFine && dataFine > dataInizio) {
+                var giorniSoggiorno = Math.round((dataFine - dataInizio) / (1000 * 60 * 60 * 24));
+                var costoTotale = prezzo * giorniSoggiorno;
+
+                $('#DurataSoggiorno').text(giorniSoggiorno + ' giorni');
+                $('#PrezzoCameraTesto').text('€ ' + prezzo.toFixed(2));
+                $('#CostoTotale').text('€ ' + costoTotale.toFixed(2));
+            } else {
+                $('#DurataSoggiorno').text('-');
+                $('#CostoTotale').text('-');
+            }
+        }
+
+        // Funzione per verificare la disponibilità della camera
+        function verificaDisponibilita() {
+            var cameraId = $('#CameraId').val();
+            var dataInizio = $('#DataInizio').val();
+            var dataFine = $('#DataFine').val();
+
+            if (cameraId && dataInizio && dataFine) {
+                $.getJSON('/Prenotazioni/VerificaDisponibilita', {
+                    cameraId: cameraId,
+                    dataInizio: dataInizio,
+                    dataFine: dataFine
+                }, function(data) {
+                    if (data.disponibile) {
+                        $('#messaggioDisponibilita').html('<div class="alert alert-success mt-2">Camera disponibile nelle date selezionate</div>');
+                        $('#btnSalva').prop('disabled', false);
+                    } else {
+                        $('#messaggioDisponibilita').html('<div class="alert alert-danger mt-2">Camera non disponibile nelle date selezionate</div>');
+                        $('#btnSalva').prop('disabled', true);
+                    }
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            // Aggiorna prezzo quando cambia la camera
+            $('#CameraId').change(function () {
+                var cameraId = $(this).val();
+                if (cameraId) {
+                    $.getJSON('/Prenotazioni/GetCameraInfo/' + cameraId, function (data) {
+                        $('#PrezzoCamera').val(data.prezzo);
+                        $('#TipoCamera').text(data.tipo);
+                        aggiornaCostoTotale();
+                        verificaDisponibilita();
+                    });
+                } else {
+                    $('#PrezzoCamera').val(0);
+                    $('#TipoCamera').text('-');
+                    aggiornaCostoTotale();
+                }
+            });
+
+            // Aggiorna il costo quando cambiano le date
+            $('#DataInizio, #DataFine').change(function () {
+                aggiornaCostoTotale();
+                verificaDisponibilita();
+            });
+        });
+    </script>
+}

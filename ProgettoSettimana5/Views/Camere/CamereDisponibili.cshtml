@@ -1,0 +1,103 @@
+﻿@model ProgettoSettimana5.ViewModels.CamereDisponibiliViewModel
+
+@{
+    ViewData["Title"] = "Verifica Disponibilità Camere";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Verifica Disponibilità Camere</h1>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Torna alle Camere
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Seleziona il periodo</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="CamereDisponibili" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label asp-for="DataInizio" class="form-label">Data Check-in</label>
+                        <input asp-for="DataInizio" class="form-control" type="date" />
+                        <span asp-validation-for="DataInizio" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label asp-for="DataFine" class="form-label">Data Check-out</label>
+                        <input asp-for="DataFine" class="form-control" type="date" />
+                        <span asp-validation-for="DataFine" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="mb-3 w-100">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Verifica
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.CamereDisponibili != null && Model.CamereDisponibili.Any())
+{
+    <div class="card shadow">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Camere Disponibili</h5>
+            <span class="badge bg-light text-dark">@Model.CamereDisponibili.Count</span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var camera in Model.CamereDisponibili)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="mb-0">Camera #@camera.Numero</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Tipologia:</strong> @camera.Tipo</p>
+                                <p><strong>Prezzo:</strong> € @camera.Prezzo.ToString("N2") per notte</p>
+                                <p><strong>Costo Totale:</strong> € @((camera.Prezzo * (Model.DataFine - Model.DataInizio).Days).ToString("N2"))</p>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <a asp-action="Details" asp-route-id="@camera.CameraId" class="btn btn-info">
+                                        <i class="bi bi-info-circle"></i> Dettagli
+                                    </a>
+                                    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+                                    {
+                                        <a asp-controller="Prenotazioni" asp-action="Create"
+                                           asp-route-cameraId="@camera.CameraId"
+                                           asp-route-dataInizio="@Model.DataInizio.ToString("yyyy-MM-dd")"
+                                           asp-route-dataFine="@Model.DataFine.ToString("yyyy-MM-dd")"
+                                           class="btn btn-primary">
+                                            <i class="bi bi-calendar-plus"></i> Prenota
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else if (Model.CamereDisponibili != null)
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Nessuna camera disponibile nel periodo selezionato.
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

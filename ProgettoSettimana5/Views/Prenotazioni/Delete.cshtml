@@ -1,0 +1,100 @@
+﻿@model ProgettoSettimana5.Models.Prenotazione
+
+@{
+    ViewData["Title"] = "Elimina Prenotazione";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Elimina Prenotazione #@Model.PrenotazioneId</h1>
+    <div>
+        <a asp-action="Details" asp-route-id="@Model.PrenotazioneId" class="btn btn-info">
+            <i class="bi bi-info-circle"></i> Dettagli
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Torna alla lista
+        </a>
+    </div>
+</div>
+
+<div class="alert alert-danger mb-4">
+    <h4 class="alert-heading"><i class="bi bi-exclamation-triangle-fill"></i> Attenzione!</h4>
+    <p>Sei sicuro di voler eliminare definitivamente questa prenotazione? Questa operazione non può essere annullata.</p>
+    <p>Se vuoi solo cancellarla (mantenendola nel sistema), torna ai dettagli e clicca su "Cancella Prenotazione".</p>
+</div>
+
+<div class="row">
+    <div class="col-md-5">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Informazioni Cliente</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Nome e Cognome:</label>
+                    <p>@Model.Cliente.NomeCompleto</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Email:</label>
+                    <p>@Model.Cliente.Email</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Telefono:</label>
+                    <p>@Model.Cliente.Telefono</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-7">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Dettagli Soggiorno</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Check-in:</label>
+                        <p>@Model.DataInizio.ToShortDateString()</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Check-out:</label>
+                        <p>@Model.DataFine.ToShortDateString()</p>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Camera:</label>
+                    <p>Camera #@Model.Camera.Numero (@Model.Camera.Tipo)</p>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Stato prenotazione:</label>
+                    <p>
+                        @switch (Model.Stato)
+                        {
+                            case StatoPrenotazione.Confermata:
+                                <span class="badge bg-success">Confermata</span>
+                                break;
+                            case StatoPrenotazione.InAttesa:
+                                <span class="badge bg-warning text-dark">In Attesa</span>
+                                break;
+                            case StatoPrenotazione.Cancellata:
+                                <span class="badge bg-danger">Cancellata</span>
+                                break;
+                            case StatoPrenotazione.Completata:
+                                <span class="badge bg-info">Completata</span>
+                                break;
+                        }
+                    </p>
+                </div>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="PrenotazioneId" />
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Conferma Eliminazione
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

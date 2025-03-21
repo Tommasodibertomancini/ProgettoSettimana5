@@ -1,0 +1,72 @@
+﻿@model ProgettoSettimana5.ViewModels.CameraEditViewModel
+
+@{
+    ViewData["Title"] = "Modifica Camera";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Modifica Camera #@Model.Numero</h1>
+    <div>
+        <a asp-action="Details" asp-route-id="@Model.CameraId" class="btn btn-info">
+            <i class="bi bi-info-circle"></i> Dettagli
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Torna alla lista
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Modifica dati della camera</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="CameraId" />
+
+                    <div class="mb-3">
+                        <label asp-for="Numero" class="form-label">Numero Camera</label>
+                        <input asp-for="Numero" class="form-control" />
+                        <span asp-validation-for="Numero" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Tipo" class="form-label">Tipologia</label>
+                        <select asp-for="Tipo" class="form-select">
+                            <option value="">-- Seleziona una tipologia --</option>
+                            <option value="Singola">Singola</option>
+                            <option value="Doppia">Doppia</option>
+                            <option value="Matrimoniale">Matrimoniale</option>
+                            <option value="Tripla">Tripla</option>
+                            <option value="Suite">Suite</option>
+                            <option value="Deluxe">Deluxe</option>
+                        </select>
+                        <span asp-validation-for="Tipo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Prezzo" class="form-label">Prezzo per notte (€)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input asp-for="Prezzo" class="form-control" type="number" min="0.01" step="0.01" />
+                        </div>
+                        <span asp-validation-for="Prezzo" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Salva Modifiche
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

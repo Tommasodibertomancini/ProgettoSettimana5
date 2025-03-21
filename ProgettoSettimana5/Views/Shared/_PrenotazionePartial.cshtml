@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ProgettoSettimana5.Models.Prenotazione>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Camera</th>
+                <th>Data Inizio</th>
+                <th>Data Fine</th>
+                <th>Stato</th>
+                <th>Azioni</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Cliente.NomeCompleto</td>
+                    <td>@item.Camera.DescrizioneCompleta</td>
+                    <td>@item.DataInizio.ToShortDateString()</td>
+                    <td>@item.DataFine.ToShortDateString()</td>
+                    <td>
+                        @switch (item.Stato)
+                        {
+                            case StatoPrenotazione.Confermata:
+                                <span class="badge bg-success">Confermata</span>
+                                break;
+                            case StatoPrenotazione.InAttesa:
+                                <span class="badge bg-warning text-dark">In Attesa</span>
+                                break;
+                            case StatoPrenotazione.Cancellata:
+                                <span class="badge bg-danger">Cancellata</span>
+                                break;
+                            case StatoPrenotazione.Completata:
+                                <span class="badge bg-info">Completata</span>
+                                break;
+                        }
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Details" asp-route-id="@item.PrenotazioneId" class="btn btn-sm btn-info">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Receptionist"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.PrenotazioneId" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                @if (item.Stato != StatoPrenotazione.Cancellata)
+                                {
+                                    <button type="button" class="btn btn-sm btn-warning"
+                                            onclick="cancellaPrenotazione(@item.PrenotazioneId)">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                }
+                            }
+                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                            {
+                                <a asp-action="Delete" asp-route-id="@item.PrenotazioneId" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Nessuna prenotazione trovata.
+    </div>
+}
