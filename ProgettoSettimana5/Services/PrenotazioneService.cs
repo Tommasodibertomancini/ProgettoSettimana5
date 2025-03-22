@@ -109,10 +109,20 @@ namespace ProgettoSettimana5.Services
                 return false;
             }
 
-            _context.Entry(prenotazione).State = EntityState.Modified;
-
             try
             {
+                var existingPrenotazione = await _context.Prenotazioni.FindAsync(prenotazione.PrenotazioneId);
+                if (existingPrenotazione == null)
+                {
+                    return false;
+                }
+
+                existingPrenotazione.ClienteId = prenotazione.ClienteId;
+                existingPrenotazione.CameraId = prenotazione.CameraId;
+                existingPrenotazione.DataInizio = prenotazione.DataInizio;
+                existingPrenotazione.DataFine = prenotazione.DataFine;
+                existingPrenotazione.Stato = prenotazione.Stato;
+
                 await _context.SaveChangesAsync();
                 return true;
             }
