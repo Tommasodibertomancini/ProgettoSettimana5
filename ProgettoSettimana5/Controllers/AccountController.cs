@@ -188,5 +188,51 @@ namespace ProgettoSettimana5.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
+
+        // GET: PublicRegister
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult PublicRegister()
+        {
+            return View();
+        }
+
+        // POST: PublicRegister
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PublicRegister(RegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.Role = "Viewer";
+
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Nome = model.Nome,
+                    Cognome = model.Cognome
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, model.Role);
+
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    TempData["SuccessMessage"] = "Registrazione completata con successo!";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+
+            return View(model);
+        }
     }
 }
