@@ -102,7 +102,7 @@
                     const stato = this.dataset.stato;
                     
                     // Carica le prenotazioni filtrate
-                    $.get('/Prenotazioni/PrenotazioniPartial', { stato: stato }, function(data) {
+                    $.get('/Prenotazioni/PrenotazionePartial', { stato: stato }, function(data) {
                         $('#prenotazioniContainer').html(data);
                     });
                 });

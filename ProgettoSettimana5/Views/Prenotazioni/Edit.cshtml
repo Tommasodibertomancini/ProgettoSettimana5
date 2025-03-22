@@ -129,44 +129,32 @@
             }
         }
 
-            function verificaDisponibilita() {
+                   function verificaDisponibilita() {
             var cameraId = $('#CameraId').val();
             var dataInizio = $('#DataInizio').val();
             var dataFine = $('#DataFine').val();
-            var prenotazioneId = $('#PrenotazioneId').val();
+            var prenotazioneId = $('#PrenotazioneId').val(); // Importante per la modifica!
 
             if (cameraId && dataInizio && dataFine) {
-                $.ajax({
-                    url: '@Url.Action("VerificaDisponibilitaCamera", "Prenotazioni")',
-                    type: 'POST',
-                    data: {
-                        cameraId: cameraId,
-                        dataInizio: dataInizio,
-                        dataFine: dataFine,
-                        prenotazioneId: prenotazioneId
-                    },
-                    success: function(response) {
-                        if (response.disponibile) {
-                            $('#messaggioDisponibilita')
-                                .removeClass('text-danger')
-                                .addClass('text-success')
-                                .text('Camera disponibile per le date selezionate');
-                            $('#btnSalva').prop('disabled', false);
-                        } else {
-                            $('#messaggioDisponibilita')
-                                .removeClass('text-success')
-                                .addClass('text-danger')
-                                .text('Camera non disponibile per le date selezionate');
-                            $('#btnSalva').prop('disabled', true);
-                        }
-                    },
-                    error: function() {
-                        $('#messaggioDisponibilita')
-                            .removeClass('text-success')
-                            .addClass('text-danger')
-                            .text('Errore nella verifica della disponibilità');
+                console.log("Verifica disponibilità: Camera=" + cameraId + ", Prenotazione=" + prenotazioneId);
+                $.getJSON('/Prenotazioni/VerificaDisponibilita', {
+                    cameraId: cameraId,
+                    dataInizio: dataInizio,
+                    dataFine: dataFine,
+                    prenotazioneId: prenotazioneId // Pass the reservation ID for edit mode
+                }, function(data) {
+                    if (data.disponibile) {
+                        $('#messaggioDisponibilita').html('<div class="alert alert-success mt-2">Camera disponibile nelle date selezionate</div>');
+                        $('#btnSalva').prop('disabled', false);
+                    } else {
+                        $('#messaggioDisponibilita').html('<div class="alert alert-danger mt-2">Camera non disponibile nelle date selezionate</div>');
                         $('#btnSalva').prop('disabled', true);
                     }
+                }).fail(function(error) {
+                    console.error("Errore nella verifica disponibilità:", error);
+                    $('#messaggioDisponibilita').html('<div class="alert alert-danger mt-2">Errore nella verifica della disponibilità</div>');
+                    // In caso di errore, manteniamo il pulsante attivo per permettere comunque il salvataggio
+                    $('#btnSalva').prop('disabled', false);
                 });
             }
         }

@@ -16,30 +16,22 @@
         <h5 class="mb-0">Seleziona il periodo</h5>
     </div>
     <div class="card-body">
-        <form asp-action="CamereDisponibili" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+        <form method="post" asp-action="CamereDisponibili">
             <div class="row">
-                <div class="col-md-5">
-                    <div class="mb-3">
-                        <label asp-for="DataInizio" class="form-label">Data Check-in</label>
-                        <input asp-for="DataInizio" class="form-control" type="date" />
-                        <span asp-validation-for="DataInizio" class="text-danger"></span>
-                    </div>
+                <div class="col-md-5 mb-3">
+                    <label asp-for="DataInizio" class="form-label">Data Check-in</label>
+                    <input asp-for="DataInizio" class="form-control" type="date" required />
+                    <span asp-validation-for="DataInizio" class="text-danger"></span>
                 </div>
-                <div class="col-md-5">
-                    <div class="mb-3">
-                        <label asp-for="DataFine" class="form-label">Data Check-out</label>
-                        <input asp-for="DataFine" class="form-control" type="date" />
-                        <span asp-validation-for="DataFine" class="text-danger"></span>
-                    </div>
+                <div class="col-md-5 mb-3">
+                    <label asp-for="DataFine" class="form-label">Data Check-out</label>
+                    <input asp-for="DataFine" class="form-control" type="date" required />
+                    <span asp-validation-for="DataFine" class="text-danger"></span>
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <div class="mb-3 w-100">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i> Verifica
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Verifica
+                    </button>
                 </div>
             </div>
         </form>
